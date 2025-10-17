@@ -7,12 +7,13 @@ use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
 
 class SendMessageToMultipleRecipients implements SmsRequest
 {
-    public string $method = 'GET';
+    public string $method = 'POST';
 
     public function __construct(
         public DhiraaguSMSData $data,
-        public string $authorization_key,
-    ) {
+        public string          $authorization_key,
+    )
+    {
     }
 
     public function getEndpoint(): string
@@ -26,7 +27,7 @@ class SendMessageToMultipleRecipients implements SmsRequest
             'destination'      => $this->data->getRecipients(),
             'content'          => $this->data->getMessage(),
             'source'           => $this->data->getSource(),
-            'key'              => $this->authorization_key,
+            'authorizationKey' => $this->authorization_key,
         ];
     }
 

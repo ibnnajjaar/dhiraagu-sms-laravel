@@ -2,13 +2,15 @@
 
 namespace IbnNajjaar\DhiraaguSMSLaravel;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\ConnectionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
 use IbnNajjaar\DhiraaguSMSLaravel\Responses\DhiraaguResponse;
 use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
-use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\RequestException;
+use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\DhiraaguRequestException;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\TransactionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToSingleRecipient;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\IncorrectCredentialsException;
@@ -30,6 +32,7 @@ class DhiraaguSMS
      * @throws ConnectionException
      * @throws TransactionException
      * @throws IncorrectCredentialsException
+     * @throws DhiraaguRequestException
      */
     public function send(DhiraaguSMSData $data): DhiraaguResponse
     {
@@ -45,6 +48,7 @@ class DhiraaguSMS
      * @throws ConnectionException
      * @throws IncorrectCredentialsException
      * @throws TransactionException
+     * @throws DhiraaguRequestException
      */
     public function sendToSingleRecipient(string $recipient, string $message, ?string $source = null): DhiraaguResponse
     {
@@ -62,7 +66,7 @@ class DhiraaguSMS
      * @throws ConnectionException
      * @throws TransactionException
      * @throws IncorrectCredentialsException
-     * @throws RequestException
+     * @throws DhiraaguRequestException
      */
     public function sendRequest(SmsRequest $sms_request): DhiraaguResponse
     {
@@ -74,16 +78,20 @@ class DhiraaguSMS
                 $sms_request->getEndpoint(),
                 $sms_request->getPayload(),
             );
-        } catch (\Exception $exception) {
-            throw RequestException::fromResponse($exception);
-        }
+        } catch (Exception $exception) {
+            $response = $exception->response;
 
-        if ($response->failed() && $response->status() === 401) {
-            throw TransactionException::fromResponse($response);
-        }
+            if ($response->failed() && $response->status() === 401) {
+                throw TransactionException::fromResponse($response);
+            }
 
-        if ($response->failed()) {
-            throw IncorrectCredentialsException::fromResponse($response);
+            if ($response->failed() && $response->status() === 422) {
+                throw DhiraaguRequestException::fromResponse($response);
+            }
+
+            if ($response->failed()) {
+                throw IncorrectCredentialsException::fromResponse($response);
+            }
         }
 
         return DhiraaguResponse::fromResponse($response);
