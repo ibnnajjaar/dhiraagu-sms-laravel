@@ -13,6 +13,7 @@ class SendMessageToSingleRecipient implements SmsRequest
         public string $recipient,
         public string $message,
         public ?string $source = null,
+        public string $authorization_key,
     )
     {
     }
@@ -28,6 +29,7 @@ class SendMessageToSingleRecipient implements SmsRequest
             'destination'      => $this->recipient,
             'content'          => $this->message,
             'source'           => $this->source,
+            'key'              => $this->authorization_key,
         ];
     }
 

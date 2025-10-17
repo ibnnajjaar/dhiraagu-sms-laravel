@@ -9,6 +9,7 @@ use Illuminate\Http\Client\ConnectionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
 use IbnNajjaar\DhiraaguSMSLaravel\Responses\DhiraaguResponse;
 use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
+use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\RequestException;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\TransactionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToSingleRecipient;
 use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToMultipleRecipients;
@@ -34,7 +35,12 @@ class DhiraaguSMS
      */
     public function send(DhiraaguSMSData $data): DhiraaguResponse
     {
-        return $this->sendRequest(new SendMessageToMultipleRecipients($data, $this->getAuthorizationKey()));
+        return $this->sendRequest(
+            new SendMessageToMultipleRecipients(
+                data: $data,
+                authorization_key: $this->getAuthorizationKey()
+            )
+        );
     }
 
     /**
@@ -44,31 +50,35 @@ class DhiraaguSMS
      */
     public function sendToSingleRecipient(string $recipient, string $message, ?string $source = null): DhiraaguResponse
     {
-        return $this->sendRequest(new SendMessageToSingleRecipient(
-            recipient: $recipient,
-            message: $message,
-            source: $source,
-        ));
+        return $this->sendRequest(
+            new SendMessageToSingleRecipient(
+                recipient: $recipient,
+                message: $message,
+                source: $source,
+                authorization_key: $this->getAuthorizationKey()
+            )
+        );
     }
 
     /**
      * @throws ConnectionException
      * @throws TransactionException
      * @throws IncorrectCredentialsException
+     * @throws RequestException
      */
     public function sendRequest(SmsRequest $sms_request): DhiraaguResponse
     {
         $client = $this->getHttpClient();
         $method = $sms_request->getMethod();
-        $response = $client->$method(
-            $sms_request->getEndpoint(),
-            array_merge(
+
+        try {
+            $response = $client->$method(
+                $sms_request->getEndpoint(),
                 $sms_request->getPayload(),
-                [
-                    'authorizationKey' => $this->getAuthorizationKey()
-                ],
-            ),
-        );
+            );
+        } catch (\Exception $exception) {
+            throw RequestException::fromResponse($exception);
+        }
 
         if ($response->failed() && $response->status() === 401) {
             throw TransactionException::fromResponse($response);
