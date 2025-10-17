@@ -7,8 +7,12 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\ConnectionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
-use Dhiraagu\DhiraaguSMS\DataObjects\DhiraaguSMSData;
+use IbnNajjaar\DhiraaguSMSLaravel\Responses\DhiraaguResponse;
+use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
+use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\TransactionException;
+use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToSingleRecipient;
 use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToMultipleRecipients;
+use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\IncorrectCredentialsException;
 
 class DhiraaguSMS
 {
@@ -25,23 +29,38 @@ class DhiraaguSMS
 
     /**
      * @throws ConnectionException
+     * @throws TransactionException
+     * @throws IncorrectCredentialsException
      */
-    public function send(DhiraaguSMSData $data): Response
+    public function send(DhiraaguSMSData $data): DhiraaguResponse
     {
-        return $this->sendRequest(new SendMessageToMultipleRecipients($data));
-    }
-
-    public function sendToSingleRecipient(string $recipient, string $message)
-    {
-
+        return $this->sendRequest(new SendMessageToMultipleRecipients($data, $this->getAuthorizationKey()));
     }
 
     /**
      * @throws ConnectionException
+     * @throws IncorrectCredentialsException
+     * @throws TransactionException
      */
-    public function sendRequest(SmsRequest $sms_request): Response
+    public function sendToSingleRecipient(string $recipient, string $message, ?string $source = null): DhiraaguResponse
     {
-        return $this->getHttpClient()->post(
+        return $this->sendRequest(new SendMessageToSingleRecipient(
+            recipient: $recipient,
+            message: $message,
+            source: $source,
+        ));
+    }
+
+    /**
+     * @throws ConnectionException
+     * @throws TransactionException
+     * @throws IncorrectCredentialsException
+     */
+    public function sendRequest(SmsRequest $sms_request): DhiraaguResponse
+    {
+        $client = $this->getHttpClient();
+        $method = $sms_request->getMethod();
+        $response = $client->$method(
             $sms_request->getEndpoint(),
             array_merge(
                 $sms_request->getPayload(),
@@ -50,6 +69,16 @@ class DhiraaguSMS
                 ],
             ),
         );
+
+        if ($response->failed() && $response->status() === 401) {
+            throw TransactionException::fromResponse($response);
+        }
+
+        if ($response->failed()) {
+            throw IncorrectCredentialsException::fromResponse($response);
+        }
+
+        return DhiraaguResponse::fromResponse($response);
     }
 
     protected function getHttpClient(): PendingRequest

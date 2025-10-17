@@ -1,6 +1,6 @@
 <?php
 
-namespace Dhiraagu\DhiraaguSMS\DataObjects;
+namespace IbnNajjaar\DhiraaguSMSLaravel\DataObjects;
 
 readonly final class DhiraaguSMSData
 {
@@ -42,43 +42,22 @@ readonly final class DhiraaguSMSData
         return 'Test';
     }
 
-    public function getRecipients(): string|array
+    public function getRecipients(): array
     {
         if (app()->environment('local')) {
-            return config('services.dhiraagu_sms.dev_mobile_number');
+            $devNumber = config('dhiraagu_sms.dev_mobile_number');
+            return is_array($devNumber) ? $devNumber : [$devNumber];
         }
 
-        $number_array = explode(',', $this->recipients);
-        $number_array = array_map('trim', $number_array);
-        $number_array = array_filter($number_array);
-        $number_array = array_unique($number_array);
-
-        // if the number starts with + remove +
-        $number_array = collect($number_array)->each(function (&$number) {
-            if (str_starts_with($number, '+')) {
-                $number = substr($number, 1);
-            }
-        });
-
-        // if number does not start with 960 and has 7 digits, prepend 960
-        $number_array = $number_array->each(function (&$number) {
-            if (! str_starts_with($number, '960') && strlen($number) == 7) {
-                $number = '960' . $number;
-            }
-        });
-
-        // now prepend all numbers starting with 960 with +
-        $number_array = $number_array->map(function ($number) {
-            return '+' . $number;
-        })->toArray();
-
-        // If total number of numbers is 1, return as string, otherwise return array
-        if (count($number_array) === 1) {
-            return $number_array[0];
-        }
-
-        return $number_array;
+        return collect(explode(',', $this->recipients))
+            ->map('trim')
+            ->filter()
+            ->unique()
+            ->map(fn($number) => ltrim($number, '+'))
+            ->map(fn($number) => strlen($number) === 7 ? "960{$number}" : $number)
+            ->map(fn($number) => "+{$number}")
+            ->values()
+            ->toArray();
     }
-
 
 }

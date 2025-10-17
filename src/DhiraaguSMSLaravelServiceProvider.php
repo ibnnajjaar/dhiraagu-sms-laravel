@@ -14,16 +14,15 @@ class DhiraaguSMSLaravelServiceProvider extends ServiceProvider
             'dhiraagu_sms'
         );
 
-        $this->app->singleton(DhiraaguSms::class, function () {
+        $this->app->singleton(DhiraaguSMS::class, function () {
             $username = config('dhiraagu_sms.username');
             $password = config('dhiraagu_sms.password');
-            dd($username, $password);
 
             if (empty($username) || empty($password)) {
-                throw new \Exception('Dhiraagu SMS username and password are required.');
+                throw new \InvalidArgumentException('Dhiraagu SMS username and password are required.');
             }
 
-            return new DhiraaguSms(
+            return new DhiraaguSMS(
                 username: $username,
                 password: $password,
             );
