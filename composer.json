@@ -18,12 +18,12 @@
         }
     ],
     "require": {
-        "php": "^8.3|^8.4",
-        "guzzlehttp/guzzle": "~7.0"
+        "php": "^8.4",
+        "illuminate/support": "^12.00"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.4",
-        "phpunit/phpunit": "^8.5.42"
+        "orchestra/testbench": "^10.6",
+        "pestphp/pest": "^4.1"
     },
     "autoload": {
         "psr-4": {
@@ -35,6 +35,13 @@
             "IbnNajjaar\\DhiraaguSMSLaravel\\Tests\\": "tests"
         }
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "IbnNajjaar\\DhiraaguSMSLaravel\\DhiraaguSMSLaravelServiceProvider"
+            ]
+        }
+    },
     "scripts": {
         "test": "vendor/bin/phpunit",
         "test-coverage": "vendor/bin/phpunit --coverage-clover=coverage.xml",
@@ -43,6 +50,7 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
+            "pestphp/pest-plugin": true,
             "phpstan/extension-installer": true
         }
     },

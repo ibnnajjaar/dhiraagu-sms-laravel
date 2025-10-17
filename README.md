@@ -19,6 +19,11 @@ Install the package using Composer:
 composer require ibnnajjaar/dhiraagu-sms-laravel
 ```
 
+You can optionally publish configuration file
+```bash
+php artisan vendor:publish --tag=dhiraagu-sms
+```
+
 ## Setup & Configuration
 
 ### Environment Setup
