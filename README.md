@@ -21,7 +21,7 @@ composer require ibnnajjaar/dhiraagu-sms-laravel
 
 You can optionally publish configuration file
 ```bash
-php artisan vendor:publish --tag=dhiraagu-sms
+php artisan vendor:publish --tag=dhiraagu_sms
 ```
 
 ## Setup & Configuration
