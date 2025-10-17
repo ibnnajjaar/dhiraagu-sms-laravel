@@ -1,0 +1,60 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: PHP ${{ matrix.php-version }} Tests
+
+    strategy:
+      matrix:
+        php-version: [8.3, 8.4]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, xml, ctype, json, curl
+          coverage: xdebug
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run test suite
+        run: |
+          if [[ "${{ startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '7.2' }}" == "true" ]]; then
+            vendor/bin/phpunit tests --coverage-clover=clover.xml --whitelist=src
+          else
+            vendor/bin/phpunit tests
+          fi
+
+      - name: Make code coverage badge
+        if: startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '7.2'
+        uses: timkrase/phpunit-coverage-badge@v1.2.1
+        with:
+          coverage_badge_path: .github/coverage.svg
+          push_badge: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          report: clover.xml

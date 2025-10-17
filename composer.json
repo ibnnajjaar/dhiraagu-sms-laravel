@@ -1,0 +1,51 @@
+{
+    "name": "ibnnajjaar/dhiraagu-sms-laravel",
+    "description": "A simple, lightweight package for sending SMS using Dhiraagu SMS API",
+    "keywords": [
+        "ibnnajjaar",
+        "dhiraagu",
+        "sms",
+        "laravel",
+        "notification"
+    ],
+    "homepage": "https://github.com/ibnnajjaar/dhiraagu-sms-laravel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hussain Afeef",
+            "email": "ibnahnajjaar@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3|^8.4",
+        "guzzlehttp/guzzle": "~7.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.4",
+        "phpunit/phpunit": "^8.5.42"
+    },
+    "autoload": {
+        "psr-4": {
+            "IbnNajjaar\\DhiraaguSMSLaravel\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "IbnNajjaar\\DhiraaguSMSLaravel\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-clover=coverage.xml",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
