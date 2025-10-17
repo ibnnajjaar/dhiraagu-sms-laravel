@@ -3,7 +3,6 @@
 namespace IbnNajjaar\DhiraaguSMSLaravel;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\Response;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\ConnectionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
@@ -12,8 +11,8 @@ use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\RequestException;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\TransactionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToSingleRecipient;
-use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToMultipleRecipients;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\IncorrectCredentialsException;
+use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToMultipleRecipients;
 
 class DhiraaguSMS
 {
@@ -23,8 +22,7 @@ class DhiraaguSMS
     public function __construct(
         private readonly string $username,
         private readonly string $password,
-    )
-    {
+    ) {
         $this->authorization_key = base64_encode($this->username . ':' . $this->password);
     }
 

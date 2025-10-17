@@ -3,7 +3,6 @@
 namespace IbnNajjaar\DhiraaguSMSLaravel\Requests;
 
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
-use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
 
 class SendMessageToSingleRecipient implements SmsRequest
 {
@@ -14,8 +13,7 @@ class SendMessageToSingleRecipient implements SmsRequest
         public string $message,
         public ?string $source = null,
         public string $authorization_key,
-    )
-    {
+    ) {
     }
 
     public function getEndpoint(): string

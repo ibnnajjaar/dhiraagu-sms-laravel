@@ -12,8 +12,7 @@ class SendMessageToMultipleRecipients implements SmsRequest
     public function __construct(
         public DhiraaguSMSData $data,
         public string $authorization_key,
-    )
-    {
+    ) {
     }
 
     public function getEndpoint(): string

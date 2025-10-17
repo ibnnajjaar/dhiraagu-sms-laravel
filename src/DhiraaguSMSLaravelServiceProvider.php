@@ -6,7 +6,6 @@ use Illuminate\Support\ServiceProvider;
 
 class DhiraaguSMSLaravelServiceProvider extends ServiceProvider
 {
-
     public function register(): void
     {
         $this->mergeConfigFrom(

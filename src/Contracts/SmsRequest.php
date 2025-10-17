@@ -7,4 +7,3 @@ interface SmsRequest
     public function getEndpoint(): string;
     public function getPayload(): array;
 }
-

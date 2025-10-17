@@ -2,9 +2,8 @@
 
 namespace IbnNajjaar\DhiraaguSMSLaravel\DataObjects;
 
-readonly final class DhiraaguSMSData
+final readonly class DhiraaguSMSData
 {
-
     private string $recipients;
     private string $message;
 
@@ -53,9 +52,9 @@ readonly final class DhiraaguSMSData
             ->map('trim')
             ->filter()
             ->unique()
-            ->map(fn($number) => ltrim($number, '+'))
-            ->map(fn($number) => strlen($number) === 7 ? "960{$number}" : $number)
-            ->map(fn($number) => "+{$number}")
+            ->map(fn ($number) => ltrim($number, '+'))
+            ->map(fn ($number) => strlen($number) === 7 ? "960{$number}" : $number)
+            ->map(fn ($number) => "+{$number}")
             ->values()
             ->toArray();
     }
