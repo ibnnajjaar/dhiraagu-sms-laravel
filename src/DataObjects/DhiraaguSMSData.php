@@ -59,8 +59,8 @@ final readonly class DhiraaguSMSData
         }
 
         return collect(explode(',', $this->recipients))
-            ->unique()
             ->map(fn ($number) => (new NormalizeNumberAction)->handle($number))
+            ->unique()
             ->filter()
             ->values()
             ->toArray();

@@ -13,20 +13,73 @@ it('builds from array and retrieves message and source', function () {
         ->and($data->getSource())->toBe('Test');
 });
 
-it('parses recipients into unique normalized list', function () {
+it('removes whitespace from recipients', function () {
     $data = DhiraaguSMSData::make()
-        ->setRecipients('9601234567, 1234567, +9601234567, 9710000000') // duplicates + invalid foreign
-        ->setMessage('Hi');
+                           ->setRecipients(' 9607123456') // duplicates + invalid foreign
+                           ->setMessage('Hi');
 
     expect($data->getRecipients())
-        ->toBeArray()
-        ->toEqual(['9601234567', '9601234567', '9601234567']);
+        ->toEqual(['9607123456']);
+});
+
+it('removes duplicates from recipients', function () {
+    $data = DhiraaguSMSData::make()
+                           ->setRecipients('9607123456, 9607123456') // duplicates + invalid foreign
+                           ->setMessage('Hi');
+
+    expect($data->getRecipients())
+        ->toEqual(['9607123456']);
+});
+
+it('removes plus signs from recipients', function () {
+    $data = DhiraaguSMSData::make()
+                           ->setRecipients('+9607123456') // duplicates + invalid foreign
+                           ->setMessage('Hi');
+
+    expect($data->getRecipients())
+        ->toEqual(['9607123456']);
+});
+
+it('removes numbers that are not 7 or 10 digits from recipients', function () {
+    $data = DhiraaguSMSData::make()
+                           ->setRecipients('333222, 7123457, 9607123456') // duplicates + invalid foreign
+                           ->setMessage('Hi');
+
+    expect($data->getRecipients())
+        ->toEqual(['9607123457', '9607123456']);
+});
+
+it('removes numbers that are 10 digits and does not have maldivian code from recipients', function () {
+    $data = DhiraaguSMSData::make()
+                           ->setRecipients('9607123456, 9997454543') // duplicates + invalid foreign
+                           ->setMessage('Hi');
+
+    expect($data->getRecipients())
+        ->toEqual(['9607123456']);
+});
+
+it('removes adds maldivian code to recipients', function () {
+    $data = DhiraaguSMSData::make()
+                           ->setRecipients('7123456') // duplicates + invalid foreign
+                           ->setMessage('Hi');
+
+    expect($data->getRecipients())
+        ->toEqual(['9607123456']);
+});
+
+it('removes any number that does not start with 7 or 9', function () {
+    $data = DhiraaguSMSData::make()
+                           ->setRecipients('5123456, 9608123456, 7123456') // duplicates + invalid foreign
+                           ->setMessage('Hi');
+
+    expect($data->getRecipients())
+        ->toEqual(['9607123456']);
 });
 
 it('returns the first recipient with getRecipient', function () {
     $data = DhiraaguSMSData::make()
-        ->setRecipients('1234567,9607654321')
+        ->setRecipients('9607654321, 9607234567')
         ->setMessage('Hi');
 
-    expect($data->getRecipient())->toBe('9601234567');
+    expect($data->getRecipient())->toBe('9607654321');
 });

@@ -16,9 +16,19 @@ class NormalizeNumberAction
             return '';
         }
 
-        // If 10 digits, validate that it starts with Maldives country code (960)
-        if ($length === 10) {
-            return str_starts_with($number, '960') ? $number : '';
+        // if number is 10-digit and does not starts with 960, remove the number
+        if ($length === 10 && ! str_starts_with($number, '960')) {
+            return '';
+        }
+
+        // if number is 10-digit and starts with 960, remove the 960
+        if ($length === 10 && str_starts_with($number, '960')) {
+            $number = substr($number, 3);
+        }
+
+        // Remove any number that does not start with 7 or 9
+        if (!preg_match('/^7|^9/', $number)) {
+            return '';
         }
 
         // Convert 7-digit local number to international format
