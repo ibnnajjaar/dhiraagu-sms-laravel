@@ -23,12 +23,17 @@ class SendMessageToMultipleRecipients implements SmsRequest
 
     public function getPayload(): array
     {
-        return [
+        $payload = [
             'destination'      => $this->data->getRecipients(),
             'content'          => $this->data->getMessage(),
-            'source'           => $this->data->getSource(),
             'authorizationKey' => $this->authorization_key,
         ];
+
+        if ($this->data->getSource()) {
+            $payload['source'] = $this->data->getSource();
+        }
+
+        return $payload;
     }
 
     public function getMethod(): string

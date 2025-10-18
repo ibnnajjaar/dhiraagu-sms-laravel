@@ -3,15 +3,14 @@
 namespace IbnNajjaar\DhiraaguSMSLaravel\Requests;
 
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
+use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
 
 class SendMessageToSingleRecipient implements SmsRequest
 {
     public string $method = 'GET';
 
     public function __construct(
-        public string $recipient,
-        public string $message,
-        public ?string $source = null,
+        public DhiraaguSMSData $data,
         public string $authorization_key,
     ) {
     }
@@ -23,12 +22,17 @@ class SendMessageToSingleRecipient implements SmsRequest
 
     public function getPayload(): array
     {
-        return [
-            'destination'      => $this->recipient,
-            'content'          => $this->message,
-            'source'           => $this->source,
+        $payload = [
+            'destination'      => $this->data->getRecipient(),
+            'content'          => $this->data->getMessage(),
             'key'              => $this->authorization_key,
         ];
+
+        if ($this->data->getSource()) {
+            $payload['source'] = $this->data->getSource();
+        }
+
+        return $payload;
     }
 
     public function getMethod(): string

@@ -8,6 +8,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\ConnectionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
+use IbnNajjaar\DhiraaguSMSLaravel\Support\SendsRequest;
 use IbnNajjaar\DhiraaguSMSLaravel\Responses\DhiraaguResponse;
 use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\DhiraaguRequestException;
@@ -18,8 +19,14 @@ use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToMultipleRecipients;
 
 class DhiraaguSMS
 {
+    use SendsRequest;
+
     private string $base_url = 'https://messaging.dhiraagu.com.mv/v1/api';
-    private string $authorization_key;
+    private string $authorization_key {
+        get {
+            return $this->authorization_key;
+        }
+    }
 
     public function __construct(
         private readonly string $username,
@@ -39,7 +46,7 @@ class DhiraaguSMS
         return $this->sendRequest(
             new SendMessageToMultipleRecipients(
                 data: $data,
-                authorization_key: $this->getAuthorizationKey()
+                authorization_key: $this->authorization_key
             )
         );
     }
@@ -50,63 +57,14 @@ class DhiraaguSMS
      * @throws TransactionException
      * @throws DhiraaguRequestException
      */
-    public function sendToSingleRecipient(string $recipient, string $message, ?string $source = null): DhiraaguResponse
+    public function sendToSingleRecipient(DhiraaguSMSData $data): DhiraaguResponse
     {
         return $this->sendRequest(
             new SendMessageToSingleRecipient(
-                recipient: $recipient,
-                message: $message,
-                source: $source,
-                authorization_key: $this->getAuthorizationKey()
+                data: $data,
+                authorization_key: $this->authorization_key
             )
         );
     }
 
-    /**
-     * @throws ConnectionException
-     * @throws TransactionException
-     * @throws IncorrectCredentialsException
-     * @throws DhiraaguRequestException
-     */
-    public function sendRequest(SmsRequest $sms_request): DhiraaguResponse
-    {
-        $client = $this->getHttpClient();
-        $method = $sms_request->getMethod();
-
-        try {
-            $response = $client->$method(
-                $sms_request->getEndpoint(),
-                $sms_request->getPayload(),
-            );
-        } catch (Exception $exception) {
-            $response = $exception->response;
-
-            if ($response->failed() && $response->status() === 401) {
-                throw TransactionException::fromResponse($response);
-            }
-
-            if ($response->failed() && $response->status() === 422) {
-                throw DhiraaguRequestException::fromResponse($response);
-            }
-
-            if ($response->failed()) {
-                throw IncorrectCredentialsException::fromResponse($response);
-            }
-        }
-
-        return DhiraaguResponse::fromResponse($response);
-    }
-
-    protected function getHttpClient(): PendingRequest
-    {
-        return Http::baseUrl($this->base_url)
-                   ->acceptJson()
-                   ->timeout(30)
-                   ->retry(3);
-    }
-
-    protected function getAuthorizationKey(): string
-    {
-        return $this->authorization_key;
-    }
 }

@@ -2,10 +2,13 @@
 
 namespace IbnNajjaar\DhiraaguSMSLaravel\DataObjects;
 
+use IbnNajjaar\DhiraaguSMSLaravel\Actions\NormalizeNumberAction;
+
 final readonly class DhiraaguSMSData
 {
     private string $recipients;
     private string $message;
+    private ?string $source;
 
     public static function make(): DhiraaguSMSData
     {
@@ -16,7 +19,8 @@ final readonly class DhiraaguSMSData
     {
         return self::make()
             ->setRecipients(data_get($data, 'recipients'))
-            ->setMessage(data_get($data, 'message'));
+            ->setMessage(data_get($data, 'message'))
+            ->setSource(data_get($data, 'source'));
     }
 
     public function setRecipients(string $recipients): self
@@ -31,14 +35,20 @@ final readonly class DhiraaguSMSData
         return $this;
     }
 
+    public function setSource(?string $source = null): self
+    {
+        $this->source = $source;
+        return $this;
+    }
+
     public function getMessage(): string
     {
         return $this->message;
     }
 
-    public function getSource(): string
+    public function getSource(): ?string
     {
-        return 'Test';
+        return $this->source;
     }
 
     public function getRecipients(): array
@@ -49,14 +59,16 @@ final readonly class DhiraaguSMSData
         }
 
         return collect(explode(',', $this->recipients))
-            ->map('trim')
-            ->filter()
             ->unique()
-            ->map(fn ($number) => ltrim($number, '+'))
-            ->map(fn ($number) => strlen($number) === 7 ? "960{$number}" : $number)
-            ->map(fn ($number) => "+{$number}")
+            ->map(fn ($number) => (new NormalizeNumberAction)->handle($number))
+            ->filter()
             ->values()
             ->toArray();
     }
 
+    public function getRecipient(): ?string
+    {
+        $recipients = $this->getRecipients();
+        return !empty($recipients) ? $recipients[0] : null;
+    }
 }
