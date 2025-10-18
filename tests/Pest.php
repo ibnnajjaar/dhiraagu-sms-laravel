@@ -1,48 +1,79 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Test Case
-|--------------------------------------------------------------------------
-|
-| The closure you provide to your test functions is always bound to a specific PHPUnit test
-| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
-| need to change it using the "pest()" function to bind a different classes or traits.
-|
-*/
+use Illuminate\Support\Facades\Http;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
-pest()
-    // ->use(Tests\TestCase::class)
-    // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+// Use Orchestra Testbench for a lightweight Laravel application in tests
+uses(OrchestraTestCase::class)->in('Feature', 'Unit');
 
-/*
-|--------------------------------------------------------------------------
-| Expectations
-|--------------------------------------------------------------------------
-|
-| When you're writing tests, you often need to check that values meet certain conditions. The
-| "expect()" function gives you access to a set of "expectations" methods that you can use
-| to assert different things. Of course, you may extend the Expectation API at any time.
-|
-*/
+// Globally mock the Dhiraagu API as per docs/api-guide.md
+beforeEach(function () {
+    // Ensure no real network calls are made
+    Http::preventStrayRequests();
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
+    Http::fake(['*' => function ($request) {
+        $url = $request->url();
+        $method = strtoupper($request->method());
+
+        $base = 'https://messaging.dhiraagu.com.mv/v1/api';
+
+        // Helper: success payload from docs
+        $success = [
+            'transactionId' => 'e3f94753-8a4c-4349-9d76-680ae9da2880',
+            'transactionStatus' => 'true',
+            'transactionDescription' => 'Message was sent for delivery',
+            'referenceNumber' => '060806032411233232311216',
+        ];
+
+        // Helper: 401 payload from docs
+        $unauthorized = [
+            'transactionId' => 'e3f94753-8a4c-4349-9d76-321ae9da2880',
+            'transactionStatus' => 'false',
+            'transactionDescription' => 'Incorrect credentials',
+            'referenceNumber' => '',
+        ];
+
+        // Helper: 4xx/5xx payload from docs
+        $genericError = [
+            'transactionId' => 'e3f94753-8a4c-4349-9d76-680ae9da2880',
+            'transactionStatus' => 'false',
+            'transactionDescription' => 'Failed to send message',
+            'referenceNumber' => '',
+        ];
+
+        if ($method === 'POST') {
+            $body = (string) $request->body();
+            $json = json_decode($body, true) ?: [];
+
+            // If auth key corresponds to base64('bad:bad') => unauthorized
+            if (($json['authorizationKey'] ?? '') === base64_encode('bad:bad')) {
+                return Http::response($unauthorized, 401);
+            }
+
+            // Simulate a 422 validation error when content is 'invalid'
+            if (($json['content'] ?? '') === 'invalid') {
+                return Http::response([
+                    'message' => 'Validation Failed',
+                    'detail' => 'The provided content is invalid.',
+                ], 422);
+            }
+
+            // Success by default
+            return Http::response($success, 200);
+        }
+
+        if ($method === 'GET') {
+            // Parse query string
+            $parts = parse_url($url);
+            parse_str($parts['query'] ?? '', $query);
+
+            if (($query['key'] ?? '') === base64_encode('bad:bad')) {
+                return Http::response($unauthorized, 401);
+            }
+
+            return Http::response($success, 200);
+        }
+
+        return Http::response($genericError, 500);
+    }]);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Functions
-|--------------------------------------------------------------------------
-|
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
-|
-*/
-
-function something()
-{
-    // ..
-}
