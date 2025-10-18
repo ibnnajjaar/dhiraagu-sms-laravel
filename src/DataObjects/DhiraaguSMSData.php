@@ -48,7 +48,7 @@ final readonly class DhiraaguSMSData
 
     public function getSource(): ?string
     {
-        return $this->source;
+        return $this->source ?? null;
     }
 
     public function getRecipients(): array

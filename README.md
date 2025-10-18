@@ -63,12 +63,9 @@ app(DhiraaguSMS::class)->send($data);
 
 ### Sending SMS to a Single Recipient
 For convenience, you can send SMS to a single recipient without creating a data object:
-**Note:** This uses a get method to send the SMS.
+**Note:** This uses a **get** method to send the SMS.
 ```php
-$recipient = '7xxxxxx';
-$message = 'Hello World';
-
-app(DhiraaguSMS::class)->sendToSingleRecipient($recipient, $message);
+app(DhiraaguSMS::class)->sendToSingleRecipient($data);
 ```
 ### Using Dependency Injection
 The DhiraaguSMS class is registered as a singleton, so you can use dependency injection in your services:
