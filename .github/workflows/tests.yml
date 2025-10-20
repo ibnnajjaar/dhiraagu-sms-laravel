@@ -44,14 +44,14 @@ jobs:
 
       - name: Run test suite
         run: |
-          if [[ "${{ startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '7.2' }}" == "true" ]]; then
+          if [[ "${{ startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '8.3' }}" == "true" ]]; then
             vendor/bin/phpunit tests --coverage-clover=clover.xml --whitelist=src
           else
             vendor/bin/phpunit tests
           fi
 
       - name: Make code coverage badge
-        if: startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '7.2'
+        if: startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '8.3'
         uses: timkrase/phpunit-coverage-badge@v1.2.1
         with:
           coverage_badge_path: .github/coverage.svg
