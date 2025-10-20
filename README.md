@@ -3,7 +3,7 @@
 [![Tests](https://github.com/ibnnajjaar/dhiraagu-sms-laravel/workflows/Tests/badge.svg)](https://github.com/ibnnajjaar/dhiraagu-sms-laravel/actions)
 ![Code Coverage Badge](./.github/coverage.svg)
 
-A simple, lightweight package for sending SMS via Dhiraagu SMS API.
+A simple, lightweight package for sending SMS via **new** Dhiraagu SMS API.
 
 ## Requirements
 
