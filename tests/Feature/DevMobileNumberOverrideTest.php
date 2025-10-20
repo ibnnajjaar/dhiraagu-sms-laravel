@@ -43,3 +43,45 @@ it('overrides any provided recipients using ServiceProvider alwaysSendTo registr
             && $data['destination'] === ['9609876543'];
     });
 });
+
+
+it('clears the override and uses provided recipients after clearAlwaysSendTo()', function () {
+    // Arrange: register a test-only service provider that initially sets the override
+    app()->register(new class(app()) extends \Illuminate\Support\ServiceProvider {
+        public function register(): void
+        {
+            \IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS::alwaysSendTo('9609876543');
+        }
+    });
+
+    // Now clear the override explicitly
+    \IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS::clearAlwaysSendTo();
+
+    // Fake Dhiraagu API
+    \Illuminate\Support\Facades\Http::fake([
+        '*' => \Illuminate\Support\Facades\Http::response([
+            'transactionId'          => '319075e0-25a3-4a4b-a330-30c1dbb865fd',
+            'transactionStatus'      => 'true',
+            'transactionDescription' => 'Message was sent for delivery',
+            'referenceNumber'        => '060806032411233232311216',
+        ], 200, []),
+    ]);
+
+    $client = new \IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS(username: 'user', password: 'pass');
+
+    // Act: attempt to send to multiple recipients (with one invalid to be dropped)
+    $resp = $client->send(\IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData::make()
+        ->setRecipients('7234567,9607654321,  1234567')
+        ->setMessage('Hello from test')
+        ->setSource('Test'));
+
+    // Assert: response type
+    expect($resp)->toBeInstanceOf(\IbnNajjaar\DhiraaguSMSLaravel\Responses\DhiraaguResponse::class);
+
+    // Assert: destination uses the normalized provided recipients (override cleared)
+    \Illuminate\Support\Facades\Http::assertSent(function (\Illuminate\Http\Client\Request $request) {
+        $data = $request->data();
+        return isset($data['destination'])
+            && $data['destination'] === ['9607234567', '9607654321'];
+    });
+});
