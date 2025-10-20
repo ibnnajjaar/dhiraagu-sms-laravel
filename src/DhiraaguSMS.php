@@ -82,20 +82,7 @@ class DhiraaguSMS
             return self::$always_send_to;
         }
 
-        $fromConfig = config('dhiraagu_sms.dev_mobile_number');
-        $fromConfig = is_string($fromConfig) ? trim($fromConfig) : '';
-        if ($fromConfig === '') {
-            return null;
-        }
-
-        $normalized = collect(explode(',', $fromConfig))
-            ->map(fn ($n) => (new \IbnNajjaar\DhiraaguSMSLaravel\Actions\NormalizeNumberAction())->handle($n))
-            ->unique()
-            ->filter()
-            ->values()
-            ->toArray();
-
-        return empty($normalized) ? null : $normalized;
+        return null;
     }
 
     /** Clear the override recipients. */

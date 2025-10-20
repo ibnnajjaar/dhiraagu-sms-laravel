@@ -1,12 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\ServiceProvider;
 use IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS;
 use IbnNajjaar\DhiraaguSMSLaravel\Responses\DhiraaguResponse;
 
-it('overrides any provided recipients with the configured dev mobile number', function () {
-    // Arrange: force a dev mobile number in config
-    config(['dhiraagu_sms.dev_mobile_number' => '9609876543']);
+it('overrides any provided recipients using ServiceProvider alwaysSendTo registration', function () {
+    // Arrange: register a test-only service provider that sets the alwaysSendTo override
+    app()->register(new class(app()) extends ServiceProvider {
+        public function register(): void
+        {
+            \IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS::alwaysSendTo('9609876543');
+        }
+    });
 
     // Fake Dhiraagu API
     Http::fake([
