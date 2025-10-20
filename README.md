@@ -99,6 +99,16 @@ class NotificationService
 ```bash
 composer test
 ```
+
+### Test Coverage
+You can generate a coverage report without requiring Xdebug or PCOV by running tests under phpdbg via the provided Composer script:
+```bash
+composer test-coverage
+```
+This will execute Pest with code coverage enabled and write a Clover report to coverage.xml. If you prefer to run Pest directly, ensure you have a coverage driver installed/enabled (e.g., Xdebug with XDEBUG_MODE=coverage):
+```bash
+XDEBUG_MODE=coverage vendor/bin/pest --coverage
+```
 ## Changelog
 
 See CHANGELOG.md for release notes: [CHANGELOG.md](./CHANGELOG.md)
