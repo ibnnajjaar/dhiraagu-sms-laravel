@@ -8,7 +8,7 @@ A simple, lightweight package for sending SMS via Dhiraagu SMS API.
 ## Requirements
 
 - PHP 8.4 or higher
-- Laravel 10.x or higher
+- Laravel 12.x or higher
 - Composer
 
 ## Installation
@@ -33,7 +33,10 @@ Before using the package, you need to obtain credentials (username and password)
 ```env
 DHIRAAGU_SMS_USERNAME=your_username
 DHIRAAGU_SMS_PASSWORD=your_password
+#DHIRAAGU_SMS_DEV_MOBILE_NUMBER=your_dev_mobile_number
 ```
+> [!NOTE] You can also add the dev mobile number to your environment variables. This is useful for testing purposes when you don't want to send SMS to real recipients during development. When this variable is set, all SMS will be sent to the specified dev mobile number instead of the actual recipients.
+> This can be used when you do not have a separate testing account.
 
 ## Usage
 ### Sending SMS to Multiple Recipients
