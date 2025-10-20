@@ -128,7 +128,6 @@ class NotificationService
         $this->dhiraaguSMS->send($data);
     }
 }
-
 ```
 
 ## Security Considerations
