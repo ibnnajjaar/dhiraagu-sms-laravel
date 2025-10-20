@@ -53,12 +53,9 @@ final readonly class DhiraaguSMSData
 
     public function getRecipients(): array
     {
-        if (app()->environment('local')) {
-            $devNumber = config('dhiraagu_sms.dev_mobile_number');
-            return is_array($devNumber) ? $devNumber : [$devNumber];
-        }
+        $recipients = config('dhiraagu_sms.dev_mobile_number') ?: $this->recipients;
 
-        return collect(explode(',', $this->recipients))
+        return collect(explode(',', $recipients))
             ->map(fn ($number) => (new NormalizeNumberAction)->handle($number))
             ->unique()
             ->filter()
