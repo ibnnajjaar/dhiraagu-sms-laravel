@@ -28,11 +28,70 @@ class DhiraaguSMS
         }
     }
 
+    /**
+     * If set, all messages will be sent to these recipients instead of the provided ones.
+     * This is useful in development/testing to prevent sending to real users.
+     * @var array<int, string>|null
+     */
+    protected static ?array $always_send_to = null;
+
     public function __construct(
         private readonly string $username,
         private readonly string $password,
     ) {
         $this->authorization_key = base64_encode($this->username . ':' . $this->password);
+    }
+
+    /**
+     * Define a global list of recipients to always send to, overriding provided recipients.
+     * Accepts a comma-separated string of numbers or null/empty to clear.
+     */
+    public static function alwaysSendTo(?string $recipients): void
+    {
+        $recipients = trim((string) $recipients);
+        if ($recipients === '') {
+            self::$always_send_to = null;
+            return;
+        }
+
+        // Normalize and store unique numbers
+        $normalized = collect(explode(',', $recipients))
+            ->map(fn ($n) => (new \IbnNajjaar\DhiraaguSMSLaravel\Actions\NormalizeNumberAction())->handle($n))
+            ->unique()
+            ->filter()
+            ->values()
+            ->toArray();
+
+        self::$always_send_to = empty($normalized) ? null : $normalized;
+    }
+
+    /** Get the override recipients if set; falls back to config value if none explicitly set. */
+    public static function getAlwaysSendTo(): ?array
+    {
+        if (is_array(self::$always_send_to)) {
+            return self::$always_send_to;
+        }
+
+        $fromConfig = config('dhiraagu_sms.dev_mobile_number');
+        $fromConfig = is_string($fromConfig) ? trim($fromConfig) : '';
+        if ($fromConfig === '') {
+            return null;
+        }
+
+        $normalized = collect(explode(',', $fromConfig))
+            ->map(fn ($n) => (new \IbnNajjaar\DhiraaguSMSLaravel\Actions\NormalizeNumberAction())->handle($n))
+            ->unique()
+            ->filter()
+            ->values()
+            ->toArray();
+
+        return empty($normalized) ? null : $normalized;
+    }
+
+    /** Clear the override recipients. */
+    public static function clearAlwaysSendTo(): void
+    {
+        self::$always_send_to = null;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace IbnNajjaar\DhiraaguSMSLaravel\Requests;
 
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
 use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
+use IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS;
 
 class SendMessageToSingleRecipient implements SmsRequest
 {
@@ -22,8 +23,11 @@ class SendMessageToSingleRecipient implements SmsRequest
 
     public function getPayload(): array
     {
+        $override = DhiraaguSMS::getAlwaysSendTo();
+        $destination = is_array($override) && !empty($override) ? $override[0] : $this->data->getRecipient();
+
         $payload = [
-            'destination'      => $this->data->getRecipient(),
+            'destination'      => $destination,
             'content'          => $this->data->getMessage(),
             'key'              => $this->authorization_key,
         ];

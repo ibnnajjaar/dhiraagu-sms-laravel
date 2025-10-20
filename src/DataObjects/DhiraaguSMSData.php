@@ -53,7 +53,7 @@ final readonly class DhiraaguSMSData
 
     public function getRecipients(): array
     {
-        $recipients = config('dhiraagu_sms.dev_mobile_number') ?: $this->recipients;
+        $recipients = $this->recipients;
 
         return collect(explode(',', $recipients))
             ->map(fn ($number) => (new NormalizeNumberAction)->handle($number))

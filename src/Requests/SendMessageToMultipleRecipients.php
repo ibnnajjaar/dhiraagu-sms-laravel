@@ -4,6 +4,7 @@ namespace IbnNajjaar\DhiraaguSMSLaravel\Requests;
 
 use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
 use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
+use IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS;
 
 class SendMessageToMultipleRecipients implements SmsRequest
 {
@@ -23,8 +24,10 @@ class SendMessageToMultipleRecipients implements SmsRequest
 
     public function getPayload(): array
     {
+        $destination = DhiraaguSMS::getAlwaysSendTo() ?? $this->data->getRecipients();
+
         $payload = [
-            'destination'      => $this->data->getRecipients(),
+            'destination'      => $destination,
             'content'          => $this->data->getMessage(),
             'authorizationKey' => $this->authorization_key,
         ];

@@ -13,6 +13,9 @@ class DhiraaguSMSLaravelServiceProvider extends ServiceProvider
             'dhiraagu_sms'
         );
 
+        // Optionally set a global override destination from config for development
+        \IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS::alwaysSendTo(config('dhiraagu_sms.dev_mobile_number'));
+
         $this->app->singleton(DhiraaguSMS::class, function () {
             $username = config('dhiraagu_sms.username');
             $password = config('dhiraagu_sms.password');
