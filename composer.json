@@ -45,7 +45,7 @@
     },
     "scripts": {
         "test": "vendor/bin/pest",
-        "test-coverage": "phpdbg -qrr vendor/bin/pest --coverage --coverage-clover=coverage.xml",
+        "test-coverage": "php -dxdebug.mode=coverage -r \"require 'vendor/autoload.php';\" vendor/bin/pest --coverage --coverage-clover=coverage.xml",
         "format": "vendor/bin/pint"
     },
     "config": {
