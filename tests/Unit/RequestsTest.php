@@ -6,7 +6,7 @@ use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToSingleRecipient;
 
 it('builds POST payload for multiple recipients including optional source', function () {
     $data = DhiraaguSMSData::make()
-        ->setRecipients('1234567,9607654321,1234567')
+        ->setRecipients('1234567,9607654321,7234567')
         ->setMessage('Test SMS')
         ->setSource('Test');
 
@@ -15,7 +15,7 @@ it('builds POST payload for multiple recipients including optional source', func
     expect($req->getEndpoint())->toBe('/sms')
         ->and($req->getMethod())->toBe('post')
         ->and($req->getPayload())->toEqual([
-            'destination' => ['9601234567', '9607654321'],
+            'destination' => ['9607654321', '9607234567'],
             'content' => 'Test SMS',
             'authorizationKey' => 'abc',
             'source' => 'Test',
@@ -24,7 +24,7 @@ it('builds POST payload for multiple recipients including optional source', func
 
 it('builds GET payload for single recipient and omits null source', function () {
     $data = DhiraaguSMSData::make()
-        ->setRecipients('1234567,9607654321')
+        ->setRecipients('7654321')
         ->setMessage('Hi');
 
     $req = new SendMessageToSingleRecipient($data, authorization_key: 'xyz');
@@ -32,7 +32,7 @@ it('builds GET payload for single recipient and omits null source', function () 
     expect($req->getEndpoint())->toBe('/sms')
         ->and($req->getMethod())->toBe('get')
         ->and($req->getPayload())->toEqual([
-            'destination' => '9601234567',
+            'destination' => '9607654321',
             'content' => 'Hi',
             'key' => 'xyz',
         ]);

@@ -44,8 +44,8 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage-clover=coverage.xml",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage-clover=coverage.xml",
         "format": "vendor/bin/pint"
     },
     "config": {
