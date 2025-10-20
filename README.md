@@ -125,7 +125,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 For questions, issues, or feature requests, please open an issue on GitHub.
 
-# Alternatives
+## Alternatives
 - [Dhiraagu SMS](https://github.com/dash8x/dhiraagu-sms) - A framework-agnostic PHP library for sending SMS via the Dhiraagu SMS API. This is the most popular package for integrating with the Dhiraagu SMS service.
 
 ## License
