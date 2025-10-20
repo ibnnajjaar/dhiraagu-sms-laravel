@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        php-version: [8.3, 8.4]
+        php-version: [ 8.4 ]
       fail-fast: false
 
     steps:
@@ -44,14 +44,14 @@ jobs:
 
       - name: Run test suite
         run: |
-          if [[ "${{ startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '8.3' }}" == "true" ]]; then
-            vendor/bin/phpunit tests --coverage-clover=clover.xml --whitelist=src
+          if [[ "${{ startsWith(github.event.head_commit.message, 'coverage') }}" == "true" ]]; then
+            vendor/bin/pest --coverage-clover=clover.xml
           else
-            vendor/bin/phpunit tests
+            vendor/bin/pest
           fi
 
       - name: Make code coverage badge
-        if: startsWith(github.event.head_commit.message, 'coverage') && matrix.php-version == '8.3'
+        if: startsWith(github.event.head_commit.message, 'coverage')
         uses: timkrase/phpunit-coverage-badge@v1.2.1
         with:
           coverage_badge_path: .github/coverage.svg
