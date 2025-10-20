@@ -70,6 +70,46 @@ For convenience, you can send SMS to a single recipient without creating a data 
 ```php
 app(DhiraaguSMS::class)->sendToSingleRecipient($data);
 ```
+
+### Development/testing: override recipients with alwaysSendTo
+In development or testing, you can force all outgoing SMS to be delivered to specific numbers, ignoring the recipients provided in your data. This helps prevent accidentally sending messages to real users.
+
+Using `DhiraaguSMS::alwaysSendTo` You can define or clear an override at runtime. The override applies only when the optional condition is true.
+
+Signature:
+```php
+public static function DhiraaguSMS::alwaysSendTo(?string $recipients, bool|Closure $condition = true): void
+```
+
+The below examples show how to use this method. You can define the override in your service provider's register method.
+```php
+use IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS;
+
+// Always send to a single number
+DhiraaguSMS::alwaysSendTo('9609876543');
+
+// Always send to multiple numbers (comma-separated)
+DhiraaguSMS::alwaysSendTo('9609876543,9607654321');
+
+// Apply only in local environment (boolean condition)
+DhiraaguSMS::alwaysSendTo('9609876543', app()->environment('local'));
+
+// Apply only in staging (Closure condition)
+DhiraaguSMS::alwaysSendTo('9609876543', fn () => app()->environment('staging'));
+
+// Clear the override (reverts to config fallback, if set)
+DhiraaguSMS::alwaysSendTo(null); // or pass an empty string
+
+// You can also completely clear any override (including config fallback effect at runtime)
+\IbnNajjaar\DhiraaguSMSLaravel\DhiraaguSMS::clearAlwaysSendTo();
+```
+
+Notes:
+- Recipients passed to alwaysSendTo are normalized and deduplicated, just like regular recipients. Invalid numbers are removed.
+- When an override is active, SendMessageToMultipleRecipients will use the full override array as the destination; SendMessageToSingleRecipient will use only the first override number.
+- If you do not call alwaysSendTo and have DHIRAAGU_SMS_DEV_MOBILE_NUMBER configured, that config value will be used automatically as an override.
+- You may call alwaysSendTo from your own service provider's register method if you prefer centralized setup.
+
 ### Using Dependency Injection
 The DhiraaguSMS class is registered as a singleton, so you can use dependency injection in your services:
 
