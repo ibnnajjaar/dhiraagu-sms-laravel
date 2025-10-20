@@ -25,7 +25,6 @@ trait SendsRequest
     {
         $client = $this->getHttpClient();
         $method = $sms_request->getMethod();
-
         try {
             $response = $client->$method(
                 $sms_request->getEndpoint(),
