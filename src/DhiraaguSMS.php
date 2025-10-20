@@ -2,6 +2,7 @@
 
 namespace IbnNajjaar\DhiraaguSMSLaravel;
 
+use Closure;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
@@ -45,9 +46,18 @@ class DhiraaguSMS
     /**
      * Define a global list of recipients to always send to, overriding provided recipients.
      * Accepts a comma-separated string of numbers or null/empty to clear.
+     *
+     * The override is only applied when $condition evaluates to true.
+     * $condition may be a boolean or a Closure returning a boolean. Defaults to true.
      */
-    public static function alwaysSendTo(?string $recipients): void
+    public static function alwaysSendTo(?string $recipients, bool|Closure $condition = true): void
     {
+        // Evaluate condition
+        $shouldApply = is_bool($condition) ? $condition : (bool) $condition();
+        if (! $shouldApply) {
+            return; // no-op when condition is false
+        }
+
         $recipients = trim((string) $recipients);
         if ($recipients === '') {
             self::$always_send_to = null;
