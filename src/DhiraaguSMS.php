@@ -12,6 +12,7 @@ use IbnNajjaar\DhiraaguSMSLaravel\Contracts\SmsRequest;
 use IbnNajjaar\DhiraaguSMSLaravel\Support\SendsRequest;
 use IbnNajjaar\DhiraaguSMSLaravel\Responses\DhiraaguResponse;
 use IbnNajjaar\DhiraaguSMSLaravel\DataObjects\DhiraaguSMSData;
+use IbnNajjaar\DhiraaguSMSLaravel\Actions\NormalizeNumberAction;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\DhiraaguRequestException;
 use IbnNajjaar\DhiraaguSMSLaravel\Exceptions\TransactionException;
 use IbnNajjaar\DhiraaguSMSLaravel\Requests\SendMessageToSingleRecipient;
@@ -66,7 +67,7 @@ class DhiraaguSMS
 
         // Normalize and store unique numbers
         $normalized = collect(explode(',', $recipients))
-            ->map(fn ($n) => (new \IbnNajjaar\DhiraaguSMSLaravel\Actions\NormalizeNumberAction())->handle($n))
+            ->map(fn ($n) => new NormalizeNumberAction()->handle($n))
             ->unique()
             ->filter()
             ->values()
